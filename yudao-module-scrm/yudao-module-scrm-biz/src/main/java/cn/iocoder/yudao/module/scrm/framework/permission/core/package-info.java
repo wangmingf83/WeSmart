@@ -1,0 +1,1 @@
+package cn.iocoder.yudao.module.scrm.framework.permission.core;
