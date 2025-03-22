@@ -1,3 +1,8 @@
+<p align="center">
+  <a href="./README.md">简体中文</a> |
+  <a href="./README.en.md">English</a> 
+</p>
+
 # 微智营
 
 ### 介绍
