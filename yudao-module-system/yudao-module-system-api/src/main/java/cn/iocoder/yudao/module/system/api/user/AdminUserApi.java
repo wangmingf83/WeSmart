@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.system.api.user;
 import cn.hutool.core.convert.Convert;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserAllDTO;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.enums.ApiConstants;
 import com.fhs.core.trans.anno.AutoTrans;

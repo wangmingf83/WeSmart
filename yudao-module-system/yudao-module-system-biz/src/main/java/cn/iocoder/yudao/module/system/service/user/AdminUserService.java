@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.system.service.user;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserAllDTO;
 import cn.iocoder.yudao.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
@@ -159,6 +160,8 @@ public interface AdminUserService {
      * @return 用户列表
      */
     List<AdminUserDO> getUserList(Collection<Long> ids);
+
+    List<AdminUserDO> getUserAllList();
 
     /**
      * 校验用户们是否有效。如下情况，视为无效：

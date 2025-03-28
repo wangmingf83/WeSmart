@@ -12,6 +12,7 @@ import lombok.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -47,6 +48,7 @@ public class AdminUserDO extends TenantBaseDO {
      * 用户昵称
      */
     private String nickname;
+
     /**
      * 备注
      */
@@ -92,5 +94,102 @@ public class AdminUserDO extends TenantBaseDO {
      * 最后登录时间
      */
     private LocalDateTime loginDate;
+
+    /**
+     * 当前微信用户对应微信端的id
+     */
+    private String weUserId;
+
+    private String corpId;
+
+    /**
+     * 直属上级
+     */
+    private String leader;
+
+    /**
+     * 企微用户激活状态(1=已激活，2=已禁用，4=未激活，5=退出企业)
+     */
+    private Integer weUserStatus;
+
+    /**
+     * 是否离职1:是；0:否
+     */
+    private Integer isUserLeave;
+
+    /**
+     * 是否开启会话存档 0-未开启 1-开启
+     */
+    private Integer isOpenChat;
+
+    /**
+     * 离职时间
+     */
+    private Date dimissionTime;
+
+    /**
+     * 离职状态员工，数据分配状态:0:未分配;1:已分配
+     */
+    private Integer isAllocate;
+
+    /**
+     * 是否开启动态日报 0开启，1关闭 默认开启0
+     */
+    private Integer openDaily;
+
+    /**
+     * 客服接待状态。1:接待中,2:停止接待
+     */
+    private Integer kfStatus;
+
+    /**
+     * 工号
+     */
+    private String jobNumber;
+
+    /**
+     * 企业邮箱
+     */
+    private String bizMail;
+
+    /**
+     * 座机号码
+     */
+    private String telephone;
+
+    /**
+     * 员工个人二维码
+     */
+    private String qrCode;
+
+    /**
+     * 成员对外属性
+     */
+    private String externalProfile;
+
+    /**
+     * 对外职务
+     */
+    private String externalPosition;
+
+    /**
+     * 地址
+     */
+    private String address;
+
+    /**
+     * open_userid
+     */
+    private String openUserid;
+
+    /**
+     * 对应mainDepartmentName
+     */
+    @TableField(exist = false)
+    private String deptName;
+
+    private String thumbAvatar;
+
+    private String extAttr;
 
 }
