@@ -21,7 +21,7 @@
         <module>yudao-module-mp</module>
         <!--<module>yudao-module-mall</module>-->
         <module>yudao-module-crm</module>
-        <module>yudao-module-scrm</module>
+        <module>yudao-module-smart</module>
         <!--<module>yudao-module-erp</module>-->
         <module>yudao-module-ai</module>
     </modules>
