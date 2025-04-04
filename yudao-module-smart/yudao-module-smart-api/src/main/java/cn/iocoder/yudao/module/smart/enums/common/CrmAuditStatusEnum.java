@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.scrm.enums.common;
+package cn.iocoder.yudao.module.smart.enums.common;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import lombok.Getter;
