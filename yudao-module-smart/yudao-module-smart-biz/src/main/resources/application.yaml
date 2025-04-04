@@ -1,9 +1,9 @@
 spring:
   application:
-    name: scrm-server
+    name: smart-server
 
   profiles:
-    active: local
+    active: dev
 
   main:
     allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
@@ -36,7 +36,7 @@ spring:
       time-to-live: 1h # 设置过期时间为 1 小时
 
 server:
-  port: 48089
+  port: 48090
 
 logging:
   file:
@@ -91,21 +91,13 @@ easy-trans:
 
 --- #################### MQ 消息队列相关配置 ####################
 
---- #################### 定时任务相关配置 ####################
-
-xxl:
-  job:
-    executor:
-      appname: ${spring.application.name} # 执行器 AppName
-      logpath: ${user.home}/logs/xxl-job/${spring.application.name} # 执行器运行日志文件存储磁盘路径
-    accessToken: default_token # 执行器通讯TOKEN
 
 --- #################### 芋道相关配置 ####################
 
 yudao:
   info:
     version: 1.0.0
-    base-package: cn.iocoder.yudao.module.scrm
+    base-package: cn.iocoder.yudao.module.smart
   web:
     admin-ui:
       url: http://dashboard.yudao.iocoder.cn # Admin 管理后台 UI 的地址
