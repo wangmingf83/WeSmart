@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.smart.dal.mysql.mapper.WeContentSendRecordMapper">
+
+
+    <select id="getWeMaterialDataCount" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.material.vo.ContentDataDetailVo"
+            parameterType="cn.iocoder.yudao.module.smart.dal.dataobject.material.query.ContentDetailQuery">
+        SELECT
+            t1.send_by,
+            t.sendTotalNum
+        FROM
+            (
+                SELECT
+                    send_by_id,
+                    ( SELECT count( 1 ) FROM we_content_send_record ft1 WHERE ft.send_by_id = ft1.send_by_id ) AS sendTotalNum
+                FROM
+                    we_content_send_record ft
+                <where>
+                    <if test="id != null"> and ft.content_id = #{id} </if>
+                    <if test="beginTime != null">and DATE_FORMAT(ft.send_time,'%Y-%m-%d') >= DATE_FORMAT(#{beginTime},'%Y-%m-%d')</if>
+                    <if test="endTime != null">and DATE_FORMAT(ft.send_time,'%Y-%m-%d') <![CDATA[<=]]> DATE_FORMAT(#{endTime},'%Y-%m-%d')</if>
+                </where>
+                GROUP BY
+                    send_by_id
+            ) t
+                INNER JOIN we_content_send_record t1 ON t.send_by_id = t1.send_by_id
+    </select>
+
+
+    <select id="selectSendTotalNumGroupByContentId"
+            resultType="cn.iocoder.yudao.module.smart.dal.dataobject.material.dto.WeContentSendViewDto">
+        SELECT
+            content_id,
+            count( 1 ) as sendTotalNum
+        FROM
+            we_content_send_record
+        GROUP BY
+            content_id
+    </select>
+
+    <select id="findContentDataDetailVo" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.material.vo.ContentDataDetailVo">
+        SELECT
+            count( id ) as sendTotalNum,
+            send_by  as sendBy
+        FROM
+            we_content_send_record
+        WHERE
+            send_by is not null
+          <if test="contentId != null">
+              AND  content_id = #{contentId}
+          </if>
+
+          <if test="talkId != null">
+              AND  talk_id = #{talkId}
+          </if>
+
+          <if test="startTime != null and startTime != ''  and endTime != null and endTime !=''">
+              AND date_format( create_time, '%Y-%m-%d' ) BETWEEN #{startTime} AND #{endTime}
+          </if>
+
+
+        GROUP BY
+            send_by_id
+        ORDER BY
+            count( id ) DESC
+    </select>
+
+
+
+</mapper>

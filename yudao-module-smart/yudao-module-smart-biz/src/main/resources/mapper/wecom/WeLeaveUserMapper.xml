@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.smart.dal.mysql.mapper.WeLeaveUserMapper">
+
+    <select id="leaveNoAllocateUserList" parameterType="cn.iocoder.yudao.module.smart.dal.dataobject.WeLeaveUser"
+            resultType="cn.iocoder.yudao.module.smart.dal.dataobject.WeLeaveUser">
+        SELECT
+         *
+        FROM
+        (
+        SELECT
+            wu.we_user_id as user_id,
+            wu.user_name,
+            wu.dimission_time as dimissionTime,
+            (SELECT GROUP_CONCAT(wd.dept_name) FROM sys_dept wd WHERE wd.dept_id=wu.dept_id) as department,
+            (SELECT count(*) FROM we_allocate_customer wac
+              WHERE wac.handover_userid=wu.we_user_id) as allocateCustomerNum,
+            (SELECT COUNT(*) FROM we_allocate_group wg WHERE wg.old_owner=wu.we_user_id) as allocateGroupNum
+        FROM
+        sys_user wu
+        WHERE
+          wu.del_flag=1
+            <if test="userName != null and userName !=''">and wu.user_name like concat('%', #{userName}, '%')</if>
+            <if test="beginTime != null and beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(wu.update_time,'%Y-%m-%d') &gt;= date_format(#{beginTime},'%Y-%m-%d')
+            </if>
+            <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(wu.update_time,'%Y-%m-%d') &lt;= date_format(#{endTime},'%Y-%m-%d')
+            </if>
+            <if test="isAllocate != null ">and wu.is_allocate = #{isAllocate}</if>
+        )wuu WHERE allocateCustomerNum >0 or allocateGroupNum>0
+    </select>
+
+    <select id="leaveAllocateUserList" parameterType="cn.iocoder.yudao.module.smart.dal.dataobject.WeLeaveUser"
+            resultType="cn.iocoder.yudao.module.smart.dal.dataobject.WeLeaveUser">
+
+        select
+            a.*
+        FROM
+        (
+        SELECT
+            wu.we_user_id as user_id,
+            wu.user_name,
+            wu.update_time as dimissionTime,
+            (SELECT GROUP_CONCAT(wd.dept_name) FROM sys_dept wd WHERE wd.dept_id=wu.dept_id) as department,
+            (SELECT COUNT(*) FROM we_allocate_customer wac WHERE wac.handover_userid=wu.we_user_id) as allocateCustomerNum,
+            (SELECT COUNT(*) FROM we_allocate_group wag WHERE wag.old_owner=wu.we_user_id) as allocateGroupNum
+        FROM sys_user wu
+        <where>
+            <if test="userName != null and userName !=''">and wu.user_name like concat('%', #{userName}, '%')</if>
+            <if test="beginTime != null and beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(wu.update_time,'%Y-%m-%d') &gt;= date_format(#{beginTime},'%Y-%m-%d')
+            </if>
+            <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(wu.update_time,'%Y-%m-%d') &lt;= date_format(#{endTime},'%Y-%m-%d')
+            </if>
+            <if test="isAllocate != null ">and wu.is_allocate = #{isAllocate}</if>
+        </where>
+        ) a
+        WHERE
+          a.allocateCustomerNum != 0 or a.allocateGroupNum !=0
+
+    </select>
+
+    <select id="getAllocateCustomers" parameterType="cn.iocoder.yudao.module.smart.dal.dataobject.WeAllocateCustomer"
+            resultType="cn.iocoder.yudao.module.smart.dal.dataobject.WeAllocateCustomer">
+        SELECT
+            wac.customer_name,
+            wac.takeover_name as takeUserName,
+            wac.allocate_time,
+            wac.external_userid as externalUserid,
+            wac.takeover_dept_name as deptNames,
+            wac.takeover_dept_name as takeoverDeptName
+        FROM
+        we_allocate_customer wac
+        <where>
+            <if test="leaveUserId != null">
+                and  wac.leave_user_id=#{leaveUserId}
+            </if>
+            <if test="beginTime != null and beginTime !='' and endTime != null and endTime !=''">
+              and  DATE_FORMAT(wac.update_time,'%Y-%m-%d') BETWEEN #{beginTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getAllocateGroups" parameterType="cn.iocoder.yudao.module.smart.dal.dataobject.WeAllocateGroups"
+            resultType="cn.iocoder.yudao.module.smart.dal.dataobject.WeAllocateGroups">
+        SELECT
+            wag.takeover_name as newOwnerName,
+            wag.chat_id,
+            wag.chat_name  as group_name,
+            wag.takeover_dept_name as deptNames,
+            wag.takeover_dept_name as department,
+            wag.allocate_time
+        FROM
+        we_allocate_group wag
+        <where>
+            <if test="leaveUserId != null">
+                AND wag.leave_user_id=#{leaveUserId}
+            </if>
+            <if test="beginTime != null and beginTime !='' and endTime != null and endTime !=''">
+                AND DATE_FORMAT(wag.update_time,'%Y-%m-%d') BETWEEN #{beginTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateWeUserIsAllocate">
+        UPDATE sys_user
+        SET is_allocate = 1
+        WHERE
+            we_user_id = #{weUserId}
+    </update>
+
+
+
+
+</mapper>

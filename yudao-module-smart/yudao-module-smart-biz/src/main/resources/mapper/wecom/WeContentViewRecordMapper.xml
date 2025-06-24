@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.smart.dal.mysql.mapper.WeContentViewRecordMapper">
+
+    <select id="getList" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.material.entity.WeContentViewRecord">
+        SELECT r.id,
+        r.view_by,
+        r.view_openid,
+        r.is_customer,
+        r.view_time,
+        r.view_watch_time,
+        r.external_user_name,
+        r.external_avatar,
+        r.external_user_id,
+        r.view_unionid
+--         (select unionid from we_customer c where c.unionid = r.view_unionid and c.unionid is not null limit 1) as unionid
+        FROM
+        we_content_view_record r
+        <where>
+            and r.del_flag = 0
+            <if test="talkId!=null">
+                and r.talk_id = #{talkId}
+            </if>
+            <if test="contentId!=null">
+                and r.content_id = #{contentId}
+            </if>
+            <if test="resourceType!=null">
+                and r.resource_type = #{resourceType}
+            </if>
+            <if test="beginTime!=null and beginTime!=''">
+                and r.view_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime!=null and endTime!=''">
+                and r.view_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="findContentDataDetailVos" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.material.vo.ContentDataDetailVo">
+        SELECT
+            COUNT(wcvr.id) as viewTotalNum,
+            wcvr.external_avatar as viewAvatar,
+            IFNULL(wcvr.external_user_name,"@微信客户") as viewBy,
+            IF((SELECT count(wc.id) from we_customer wc WHERE wc.unionid=wcvr.view_unionid)>0,1,0)	 as isCustomer,
+            wcvr.external_user_id as externalUserid,
+            ROUND(sum(wcvr.view_watch_time)/ 1000,0) as viewDuration
+        FROM
+            we_content_view_record wcvr
+        WHERE date_format(wcvr.create_time,'%Y-%m-%d') BETWEEN #{startTime} AND #{endTime}
+          and wcvr.content_id=#{contentId}
+        GROUP BY wcvr.view_openid
+    </select>
+
+
+</mapper>

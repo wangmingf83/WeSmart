@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.smart.dal.mysql.mapper.WeCommunityNewGroupMapper">
+
+
+
+    <select id="countTab" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.community.vo.WeCommunityNewGroupTabCountVo">
+        SELECT
+            (
+                SELECT
+                    count(*)
+                FROM
+                    we_customer where state=#{newGroup.emplCodeState}
+            ) as addCustomerNumber,
+            (
+                SELECT
+                    count(*)
+                FROM
+                    we_customer where date_format(add_time,'%Y-%m-%d') = date_format(curdate(),'%Y-%m-%d') and state=#{newGroup.emplCodeState}
+            ) as tdAddCustomerNumber,
+            (
+                SELECT
+                    count(*)
+                FROM we_group_member where state=#{newGroup.groupCodeState}
+            ) as joinGroupCustomerNumber,
+            (
+                SELECT
+                    count(*)
+                FROM we_group_member WHERE date_format(join_time,'%Y-%m-%d') = date_format(curdate(),'%Y-%m-%d') and state=#{newGroup.groupCodeState}
+            ) as tdJoinGroupCustomerNumber
+    </select>
+
+
+    <select id="findTrendCountVo" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.community.vo.WeCommunityNewGroupTrendCountVo">
+        SELECT
+            sdd.date,
+            (
+                SELECT
+                    count(*)
+                FROM
+                    we_customer wc
+                WHERE
+                        DATE_FORMAT( wc.add_time, '%Y-%m-%d' )= DATE_FORMAT( sdd.date, '%Y-%m-%d' )
+                  AND wc.state = #{newGroup.emplCodeState}
+            ) AS addCustomerNumber,
+            (
+                SELECT
+                    count(*)
+                FROM
+                    we_group_member wgm
+                WHERE
+                        DATE_FORMAT( wgm.join_time, '%Y-%m-%d' )= DATE_FORMAT( sdd.date, '%Y-%m-%d' )
+                  AND wgm.state = #{newGroup.groupCodeState}
+            ) AS joinGroupCustomerNumber
+        FROM
+            sys_dim_date sdd
+        WHERE
+            DATE_FORMAT( sdd.date, '%Y-%m-%d' ) BETWEEN #{newGroup.beginTime} AND #{newGroup.endTime}
+    </select>
+
+
+
+    <select id="findWeCommunityNewGroupTable" resultType="cn.iocoder.yudao.module.smart.dal.dataobject.community.vo.WeCommunityNewGroupTableVo">
+        SELECT
+            wc.avatar,
+            wc.customer_name,
+            wc.customer_type,
+            wc.external_userid AS externalUserid,
+            wc.add_user_id,
+            wc.add_time,
+            wc.gender,
+            (SELECT GROUP_CONCAT(DISTINCT su.user_name) from sys_user su where su.we_user_id=wc.add_user_id) as addUserName,
+            (SELECT count(*) from we_group_member wgm WHERE wc.external_userid = wgm.user_id  and wgm.state=#{query.groupState} and wgm.quit_scene  IS  NULL) as joinGroupNumber,
+            IF((SELECT count(*) from we_group_member wgm WHERE wc.external_userid = wgm.user_id  and wgm.state=#{query.groupState}  and wgm.quit_scene  IS  NULL)>0,1,0) as isJoinGroup
+        FROM
+        we_customer wc
+        <where>
+           <if test="query.state != null and query.state !=''">
+                and wc.state = #{query.state}
+           </if>
+           <if test="query.customerName != null and query.customerName !='' ">
+             and  wc.customer_name  LIKE CONCAT('%',#{query.customerName,jdbcType=VARCHAR},'%')
+           </if>
+
+          <if test="query.startAddTime != null and query.startAddTime !='' and query.endAddTime != null and query.endAddTime !='' ">
+              AND  date_format(wcr.add_time,'%Y-%m-%d') BETWEEN #{query.startAddTime} AND #{query.endAddTime}
+          </if>
+          <choose>
+              <when test="query.isJoinGroup != null">
+                <if test="query.isJoinGroup ==1 ">
+                    HAVING(joinGroupNumber)>0
+                </if>
+              </when>
+          </choose>
+
+        </where>
+    </select>
+
+
+</mapper>
