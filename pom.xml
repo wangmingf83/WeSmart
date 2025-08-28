@@ -14,7 +14,6 @@
         <!--  各种 module 拓展 -->
         <module>wesmart-module-system</module>
         <module>wesmart-module-infra</module>
-        <module>wesmart-module-smart</module>
     </modules>
 
     <name>${project.artifactId}</name>
