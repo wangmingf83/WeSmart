@@ -54,6 +54,13 @@
    **微信：** 13512785017
 
 
+###  仓库地址
+
+github: https://github.com/wangmingf83/WeSmart
+
+gitee:  https://gitee.com/wangmingf83/WeSmart
+
+
 ### 系统截图
 
 <img src="./docs/2025-08-28_112846_146.jpg" alt="描述文字">
