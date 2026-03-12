@@ -37,6 +37,10 @@
 
 <img src="./docs/20250321150727.png" width="700" height="430" alt="描述文字">
 
+###  交流群
+
+<img src="./docs/20240325121359.png" width="100" height="100" alt="描述文字">
+
 ###  商务合作、定制开发请加企微
 
 <img src="./docs/20240325121355.jpg" width="100" height="100" alt="描述文字">
