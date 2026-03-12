@@ -43,7 +43,7 @@
 
 ###  商务合作、定制开发请加企微
 
-<img src="./docs/20240325121355.jpg" width="100" height="100" alt="描述文字">
+<img src="./docs/20240325121355.png" width="100" height="100" alt="描述文字">
 
 
 ###  仓库地址
