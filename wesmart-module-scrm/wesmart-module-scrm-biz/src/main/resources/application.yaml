@@ -1,0 +1,194 @@
+server:
+  port: 48093
+
+spring:
+  application:
+    name: smart-server
+
+  profiles:
+#    active: prod
+    active: dev
+#    active: local
+
+  main:
+    allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
+    allow-bean-definition-overriding: true # 允许 Bean 覆盖，例如说 Feign 等会存在重复定义的服务
+
+  config:
+    import:
+      - optional:classpath:application-${spring.profiles.active}.yaml # 加载【本地】配置
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml # 加载【Nacos】的配置
+
+  # Servlet 配置
+  servlet:
+    # 文件上传相关配置项
+    multipart:
+      max-file-size: 16MB # 单个文件大小
+      max-request-size: 32MB # 设置总上传的文件大小
+
+  # Jackson 配置项
+  jackson:
+#    date-format: yyyy-MM-dd HH:mm:ss
+#    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: true # 设置 LocalDateTime 的格式，使用时间戳
+      write-date-timestamps-as-nanoseconds: false # 设置不使用 nanoseconds 的格式。例如说 1611460870.401，而是直接 1611460870401
+      write-durations-as-timestamps: true # 设置 Duration 的格式，使用时间戳
+      fail-on-empty-beans: false # 允许序列化无属性的 Bean
+
+  # Cache 配置项
+  cache:
+    type: REDIS
+    redis:
+      time-to-live: 1h # 设置过期时间为 1 小时
+
+logging:
+  file:
+    name: ${user.home}/logs/${spring.application.name}.log # 日志文件名，全路径
+
+--- #################### 接口文档配置 ####################
+
+springdoc:
+  api-docs:
+    enabled: true # 1. 是否开启 Swagger 接文档的元数据
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true # 2.1 是否开启 Swagger 文档的官方 UI 界面
+    path: /swagger-ui
+  default-flat-param-object: true # 参见 https://doc.xiaominfo.com/docs/faq/v4/knife4j-parameterobject-flat-param 文档
+
+knife4j:
+  enable: false # TODO 芋艿：需要关闭增强，具体原因见：https://github.com/xiaoymin/knife4j/issues/874
+  setting:
+    language: zh_cn
+
+# MyBatis Plus 的配置项
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true # 虽然默认为 true ，但是还是显示去指定下。
+  global-config:
+    db-config:
+      id-type: NONE # “智能”模式，基于 IdTypeEnvironmentPostProcessor + 数据源的类型，自动适配成 AUTO、INPUT 模式。
+      #      id-type: AUTO # 自增 ID，适合 MySQL 等直接自增的数据库
+      #      id-type: INPUT # 用户输入 ID，适合 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库
+      #      id-type: ASSIGN_ID # 分配 ID，默认使用雪花算法。注意，Oracle、PostgreSQL、Kingbase、DB2、H2 数据库时，需要去除实体类上的 @KeySequence 注解
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+    banner: false # 关闭控制台的 Banner 打印
+  type-aliases-package: ${yudao.info.base-package}.dal.dataobject
+  encryptor:
+    password: XDV71a+xqStEA3WH # 加解密的秘钥，可使用 https://www.imaegoo.com/2020/aes-key-generator/ 网站生成
+
+mybatis-plus-join:
+  banner: false # 关闭控制台的 Banner 打印
+
+pagehelper:
+  helper-dialect: mysql  # 指定数据库方言
+  reasonable: true       # 分页合理化参数
+  support-methods-arguments: true  # 支持通过Mapper接口参数传递分页参数
+  params: count=countSql # 用于从对象中根据属性名取出值
+  auto-dialect-class: true  # 自动获取数据库类型
+  page-size-zero: true   # pageSize=0时查询全部结果
+  row-bounds-with-count: true  # 使用RowBounds分页会进行count查询
+
+# VO 转换（数据翻译）相关
+easy-trans:
+  is-enable-global: true # 启用全局翻译（拦截所有 SpringMVC ResponseBody 进行自动翻译 )。如果对于性能要求很高可关闭此配置，或通过 @IgnoreTrans 忽略某个接口
+
+--- #################### MQ 消息队列相关配置 ####################
+
+--- #################### 定时任务相关配置 ####################
+
+--- #################### 芋道相关配置 ####################
+
+yudao:
+  info:
+    version: 1.0.0
+    base-package: cn.iocoder.yudao.module.smart
+  web:
+    admin-ui:
+      url: http://dashboard.guituai.cn # Admin 管理后台 UI 的地址
+  xss:
+    enable: false
+    exclude-urls: # 如下两个 url，仅仅是为了演示，去掉配置也没关系
+      - ${spring.boot.admin.context-path}/** # 不处理 Spring Boot Admin 的请求
+      - ${management.endpoints.web.base-path}/** # 不处理 Actuator 的请求
+  security:
+    permit-all_urls:
+      - /admin-api/smart/wecom/callback/** # 微信开放平台，微信回调接口，不需要登录
+      - /admin-api/smart/mp/callback/** # 微信开放平台，公众号回调接口，不需要登录
+      - /admin-api/smart/short/link/validationShortLink/** # 短链校验不用登录
+      - /admin-api/smart/customerlink/validationShortLink/** # 企微获客助手短链校验不用登录
+      - /admin-api/smart/area/**
+      - /admin-api/smart/live/getLivingCodeById # 获取直播凭证，不需要登录，因为是微信用户直接观看直播
+      - /admin-api/smart/groupCode/getActualCode/** # 客户群活码 获取群活码详情，路径参数为id
+      - /admin-api/wxapi/groupCode/getActualCode/**
+      - /admin-api/smart/qr/get/** # 员工活码 获取活码详情，路径参数为id
+      - /admin-api/wxapi/qrCode/getActualCode/** # 员工活码 获取活码详情，路径参数为id
+      - /admin-api/wxapi/groupCode/findWeCommunityNewGroupById/** # 获取新客自动拉群详细信息, 路径参数为id
+      - /admin-api/wxapi/groupCode/findWePresTagGroupById/**  # 老客标签建群详情信息, 路径参数为id
+      - /admin-api/smart/groupCode/getByDetail/**  # 通过短链接获取群活码详情, 路径参数为id
+      #- /admin-api/wxapi/material/action/addView  # 保存素材查看详情
+      - /admin-api/wxapi/material/get/**  # 根据Id获取素材
+      - /admin-api/wxapi/wx/track/material/auth/get  # 通过微信openid获取授权信息
+      - /admin-api/wxapi/wx/track/material/auth/save  # 保存客户授权信息  openid、unionid
+      - /admin-api/smart/gqr/**  # 群活码短链换取长链, 路径参数为id
+      - /admin-api/smart/pqr/**  # 员工活码短链换取长链, 路径参数为id
+      - /admin-api/smart/short/link/getByShort/**  # 通过短链接获取短链详情, 路径参数为id
+      - /admin-api/smart/qr/getBydetail/** # 员工活码 通过短链接获取活码详情, 路径参数为id
+      - /admin-api/smart/form/survey/getInfo/** # 查询智能表单详情，路径参数为id
+      - /admin-api/wxapi/form/survey/getInfo/**
+      - /admin-api/smart/form/answer/add # 智能表单  新增用户填写信息，用户填写表单后提交到此，表单ID必带
+      - /admin-api/smart/form/answer/isCompleteSurvey  # 智能表单 判断用户是否已经填写表单，表单ID必带
+      - /admin-api/smart/form/statistic/answer/export  # 智能表单 问卷答案数据导出，问卷ID必带belongId
+      - /admin-api/wxapi/form/statistic/siteStas # 智能表单 站点统计，问卷ID必带belongId
+      - /admin-api/smart/form/statistic/areaStatistic # 智能表单 省级联动，通过formId关联查询
+      - /admin-api/smart/form/answer/getAnswerList  # 智能表单 查询用户填写信息列表，问卷ID必带belongId
+      - /admin-api/wxapi/form/statistic/insertPieValue # 智能表单 保存饼图数据，需带租户id
+      - /admin-api/wxapi/fission/findFissionPoster # 裂变任务
+      - /admin-api/wxapi/fission/findWeFissionProgress # 裂变任务
+
+
+  swagger:
+    title: 管理后台
+    description: 提供管理员管理的所有功能
+    version: ${yudao.info.version}
+  tenant: # 多租户相关配置项
+    enable: true
+    ignore-urls:
+      - /admin-api/smart/wecom/callback/** # 企业回调接口，无法携带租户编号
+      - /admin-api/smart/mp/callback/** # 公众号回调接口，无法携带租户编号
+      - /admin-api/smart/short/link/validationShortLink/** # 短链校验，无法携带租户编号
+      - /admin-api/smart/customerlink/validationShortLink/** # 路径参数为ID
+
+      - /admin-api/smart/area/**
+      - /admin-api/smart/live/getLivingCodeById # 获取直播凭证，不需要登录，因为是微信用户直接观看直播
+      - /admin-api/smart/groupCode/getActualCode/** # 客户群活码 获取群活码详情，路径参数为id
+      - /admin-api/wxapi/groupCode/getActualCode/**
+      - /admin-api/smart/qr/get/** # 员工活码 获取活码详情，路径参数为id
+      - /admin-api/wxapi/qrCode/getActualCode/** # 员工活码 获取活码详情，路径参数为id
+      - /admin-api/wxapi/groupCode/findWeCommunityNewGroupById/** # 获取新客自动拉群详细信息, 路径参数为id
+      - /admin-api/wxapi/groupCode/findWePresTagGroupById/**  # 老客标签建群详情信息, 路径参数为id
+      - /admin-api/smart/groupCode/getByDetail/**  # 通过短链接获取群活码详情, 路径参数为id
+      # - /admin-api/wxapi/material/action/addView  # 保存素材查看详情
+      - /admin-api/wxapi/material/get/**  # 根据Id获取素材
+      - /admin-api/wxapi/wx/track/material/auth/get  # 通过微信openid获取授权信息
+      # - /admin-api/wxapi/wx/track/material/auth/save  # 保存客户授权信息  openid、unionid
+      - /admin-api/smart/gqr/**  # 群活码短链换取长链, 路径参数为id
+      - /admin-api/smart/pqr/**  # 员工活码短链换取长链, 路径参数为id
+      - /admin-api/smart/short/link/getByShort/**  # 通过短链接获取短链详情, 路径参数为id
+      - /admin-api/smart/qr/getBydetail/** # 员工活码 通过短链接获取活码详情, 路径参数为id
+      - /admin-api/smart/form/survey/getInfo/** # 查询智能表单详情，路径参数为id
+      - /admin-api/wxapi/form/survey/getInfo/**
+      - /admin-api/smart/form/answer/add # 智能表单  新增用户填写信息，用户填写表单后提交到此，表单ID必带
+      - /admin-api/smart/form/answer/isCompleteSurvey  # 智能表单 判断用户是否已经填写表单，表单ID必带
+      - /admin-api/smart/form/statistic/answer/export  # 智能表单 问卷答案数据导出，问卷ID必带belongId
+      - /admin-api/wxapi/form/statistic/siteStas # 智能表单 站点统计，问卷ID必带belongId
+      - /admin-api/smart/form/statistic/areaStatistic # 智能表单 省级联动，通过formId关联查询
+      - /admin-api/smart/form/answer/getAnswerList  # 智能表单 查询用户填写信息列表，问卷ID必带belongId
+      - /admin-api/wxapi/fission/findFissionPoster # 裂变任务
+      - /admin-api/wxapi/fission/findWeFissionProgress # 裂变任务
+
+      - /rpc-api/smart/corp/getCorpAccountByCorpId
+
+debug: false
