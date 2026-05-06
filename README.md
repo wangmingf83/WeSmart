@@ -19,7 +19,7 @@
 </div>
 
 <div align="center">
-  <img src="https://web-file-zb.oss-cn-zhangjiakou.aliyuncs.com/strike/e049cef090b1fff6f1161924c26799f0.png" alt="WeSmart Architecture" width="80%">
+  我们打通了 <strong>“企业微信、个人微信、公众号、视频号、抖音”</strong>等生态。
 </div>
 
 ---
