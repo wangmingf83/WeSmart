@@ -111,6 +111,8 @@ gitee:  https://gitee.com/wangmingf83/WeSmart
 
 ### 系统截图
 
+<img src="./docs/815_2568.png" alt="描述文字">
+
 <img src="./docs/2025-08-28_112846_146.jpg" alt="描述文字">
 
 <img src="./docs/2025-08-28_113032_692.jpg" alt="描述文字">
