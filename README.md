@@ -101,13 +101,6 @@ WeSmart 引入了深度 AI 能力，打通了从**“内容生产”**到**“�
 ---
 
 
-###  仓库地址
-
-github: https://github.com/wangmingf83/WeSmart
-
-gitee:  https://gitee.com/wangmingf83/WeSmart
-
-
 ### 系统截图
 
 <img src="./docs/815_2568.png" alt="描述文字">
